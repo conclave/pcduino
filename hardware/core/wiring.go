@@ -87,15 +87,18 @@ func write_to_file(fd *os.File, data []byte) error {
 
 func ioctl(fd int, request, argp uintptr) error {
 	_, _, errno := syscall.Syscall(syscall.SYS_IOCTL, uintptr(fd), request, argp)
+	if errno == 0 {
+		return nil
+	}
 	return os.NewSyscallError("ioctl", errno)
 }
 
 func Hw_PinMode(pin, mode byte) {
 	if pin >= 0 && pin <= MAX_GPIO_NUM && mode <= MAX_GPIO_MODE_NUM {
 		// data := []byte{mode}
-		data := []byte(fmt.Sprintf("%d", mode))
+		data := []byte{mode + 0x30}
 		if err := write_to_file(gpio_mode_fd[pin], data); err != nil {
-			fmt.Fprintf(os.Stderr, "write gpio %d mode failed\n", pin)
+			fmt.Fprintf(os.Stderr, "write gpio %d mode failed: %v\n", pin, err)
 			os.Exit(-1)
 		}
 	} else {
@@ -114,6 +117,7 @@ func PinMode(pin, mode byte) {
 		defer syscall.Close(fd)
 		var val uint32 = uint32(pin)
 		if err = ioctl(fd, 0x102, uintptr(unsafe.Pointer(&val))); err != nil {
+			fmt.Fprintf(os.Stderr, "%v", err)
 			panic("can't set PWMTMR_STOP")
 		}
 	}
@@ -127,9 +131,9 @@ func PinMode(pin, mode byte) {
 
 func DigitalWrite(pin, value byte) {
 	if pin >= 0 && pin <= MAX_GPIO_NUM && (value == HIGH || value == LOW) {
-		data := []byte(fmt.Sprintf("%d", value))
+		data := []byte{value + 0x30}
 		if err := write_to_file(gpio_pin_fd[pin], data); err != nil {
-			fmt.Fprintf(os.Stderr, "write gpio %d failed\n", pin)
+			fmt.Fprintf(os.Stderr, "write gpio %d failed: %v\n", pin, err)
 			os.Exit(-1)
 		}
 	} else {
