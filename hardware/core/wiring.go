@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"syscall"
+	"unsafe"
 
 	. "github.com/conclave/pcduino/hardware/sunxi"
 )
@@ -84,12 +85,9 @@ func write_to_file(fd *os.File, data []byte) error {
 	return err
 }
 
-func ioctl(fd, cmd, arg uintptr) (err error) {
-	_, _, e1 := syscall.Syscall6(syscall.SYS_IOCTL, fd, cmd, arg, 0, 0, 0)
-	if e1 != 0 {
-		err = e1
-	}
-	return
+func ioctl(fd int, request, argp uintptr) error {
+	_, _, errno := syscall.Syscall(syscall.SYS_IOCTL, uintptr(fd), request, argp)
+	return os.NewSyscallError("ioctl", errno)
 }
 
 func Hw_PinMode(pin, mode byte) {
@@ -109,12 +107,13 @@ func Hw_PinMode(pin, mode byte) {
 func PinMode(pin, mode byte) {
 	switch pin {
 	case 3, 9, 10, 11:
-		fd, err := os.Open("/dev/pwmtimer")
+		fd, err := syscall.Open("/dev/pwmtimer", os.O_RDONLY|syscall.O_CLOEXEC, 0666)
 		if err != nil {
 			panic("open pwm device fail")
 		}
-		defer fd.Close()
-		if err = ioctl(fd.Fd(), 0x102, uintptr(pin)); err != nil {
+		defer syscall.Close(fd)
+		var val uint32 = uint32(pin)
+		if err = ioctl(fd, 0x102, uintptr(unsafe.Pointer(&val))); err != nil {
 			panic("can't set PWMTMR_STOP")
 		}
 	}
