@@ -4,10 +4,9 @@ import (
 	"unsafe"
 )
 
-// spidev.h
 const SPI_IOC_MAGIC = 'k'
 
-type SPI_ioc_transfer struct {
+type SPI_IOC_Transfer struct {
 	tx_buf, rx_buf           uint64
 	length, speed_hz         uint32
 	delay_usecs              uint16
@@ -60,8 +59,8 @@ func SPI_IOC_MESSAGE(n uintptr) uintptr {
 	return IOW(SPI_IOC_MAGIC, 0, uintptr(SPI_MESSAGE_SIZE(n)))
 }
 func SPI_MESSAGE_SIZE(n uintptr) uintptr {
-	if (n * unsafe.Sizeof(SPI_ioc_transfer{})) < (1 << IOC_SIZEBITS) {
-		return (n * unsafe.Sizeof(SPI_ioc_transfer{}))
+	if (n * unsafe.Sizeof(SPI_IOC_Transfer{})) < (1 << IOC_SIZEBITS) {
+		return (n * unsafe.Sizeof(SPI_IOC_Transfer{}))
 	}
 	return 0
 }

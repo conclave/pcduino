@@ -21,7 +21,6 @@ const (
 	EXTERNAL_NUM_INTERRUPTS = 2
 )
 
-// wiring_analog 1
 const (
 	PWMTMR_START    = 0x101
 	PWMTMR_STOP     = 0x102
@@ -51,6 +50,7 @@ func init() {
 }
 
 // wiring
+
 func Init() {
 	var err error
 	for i := 0; i < MAX_GPIO_NUM; i++ {
@@ -78,6 +78,7 @@ func Init() {
 }
 
 // wiring_digital
+
 func write_to_file(fd *os.File, data []byte) error {
 	fd.Seek(0, os.SEEK_SET)
 	n, err := fd.Write(data)
@@ -89,7 +90,6 @@ func write_to_file(fd *os.File, data []byte) error {
 
 func Hw_PinMode(pin, mode byte) {
 	if pin >= 0 && pin <= MAX_GPIO_NUM && mode <= MAX_GPIO_MODE_NUM {
-		// data := []byte{mode}
 		data := []byte{mode + 0x30}
 		if err := write_to_file(gpio_mode_fd[pin], data); err != nil {
 			fmt.Fprintf(os.Stderr, "write gpio %d mode failed: %v\n", pin, err)
@@ -162,6 +162,7 @@ func DigitalRead(pin byte) byte {
 }
 
 // wiring_pulse
+
 //caution: if the pulse and timeout is too large, the CPU will continue 100% usage until the func quit.
 func PulseIn(pin, state byte, timeout int64) int64 {
 	PinMode(pin, INPUT)
@@ -186,6 +187,7 @@ func PulseIn(pin, state byte, timeout int64) int64 {
 }
 
 // wiring_shift
+
 func ShiftIn(dataPin, clockPin, bitOrder byte) byte {
 	var value byte = 0
 	PinMode(clockPin, OUTPUT)
@@ -216,7 +218,8 @@ func ShiftOut(dataPin, clockPin, bitOrder, value byte) {
 	}
 }
 
-// wiring_analog 2
+// wiring_analog
+
 type PWM_Config struct {
 	channel   int
 	dutycycle int
@@ -234,7 +237,7 @@ func SPI_adc_read_data(channel byte) int {
 	Hw_PinMode(SPIEX_MOSI, IO_SPIEX_FUNC)
 	Hw_PinMode(SPIEX_MISO, IO_SPIEX_FUNC)
 	Hw_PinMode(SPIEX_CLK, IO_SPIEX_FUNC)
-	transfer := SPI_ioc_transfer{}
+	transfer := SPI_IOC_Transfer{}
 	mode := 0
 	fd, err := syscall.Open(spi2_dev, os.O_RDWR|syscall.O_CLOEXEC, 0666)
 	if err != nil {

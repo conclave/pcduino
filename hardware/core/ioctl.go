@@ -15,6 +15,7 @@ func Ioctl(fd int, request, argp uintptr) error {
 
 // below copied from
 // https://github.com/luismesas/goPi/blob/master/ioctl/ioctl.go
+
 const (
 	IOC_NRBITS    = 8
 	IOC_TYPEBITS  = 8
@@ -35,6 +36,7 @@ const (
 )
 
 //...and for the drivers/sound files...
+
 const (
 	IOC_IN        = IOC_WRITE << IOC_DIRSHIFT
 	IOC_OUT       = IOC_READ << IOC_DIRSHIFT
