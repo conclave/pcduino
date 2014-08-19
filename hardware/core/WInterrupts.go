@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"os"
+	"os/signal"
 	"syscall"
 	"unsafe"
 )
@@ -20,9 +21,22 @@ const swirq_dev = "/dev/swirq"
 type SWIrq_Config struct {
 	channel   uint8
 	mode, pid int
-} // TODO: Ioctl
+}
 
 type userFunc func()
+
+var user1fn, user2fn userFunc
+var c1, c2 chan os.Signal
+var b1, b2 chan bool
+
+func init() {
+	c1 = make(chan os.Signal, 1)
+	c2 = make(chan os.Signal, 1)
+	b1 = make(chan bool, 1)
+	b2 = make(chan bool, 1)
+	signal.Notify(c1, syscall.SIGUSR1)
+	signal.Notify(c2, syscall.SIGUSR2)
+}
 
 func AttachInterrupt(irqno uint8, fn userFunc, modec int) {
 	hwmode := 0
@@ -40,11 +54,43 @@ func AttachInterrupt(irqno uint8, fn userFunc, modec int) {
 			fmt.Fprintf(os.Stderr, "attachInterrupt error: set interrupt %d to invalid mode\n", irqno)
 			return
 		}
-		switch irqno { //TODO: impl signal
+		switch irqno {
 		case 0:
-			// signal(SIGUSR1, (void (*) (int))userFunc);
+			if user1fn != nil {
+				b1 <- true
+			}
+			user1fn = fn
+			go func() {
+				for {
+					select {
+					case <-c1:
+						if user1fn != nil {
+							user1fn()
+						}
+					case <-b1:
+						user1fn = nil
+						return
+					}
+				}
+			}()
 		case 1:
-			// signal(SIGUSR2, (void (*) (int))userFunc);
+			if user2fn != nil {
+				b2 <- true
+			}
+			user2fn = fn
+			go func() {
+				for {
+					select {
+					case <-c2:
+						if user2fn != nil {
+							user2fn()
+						}
+					case <-b2:
+						user2fn = nil
+						return
+					}
+				}
+			}()
 		}
 		pid := os.Getpid()
 		irqconfig := SWIrq_Config{irqno, hwmode, pid}
@@ -81,6 +127,12 @@ func DetachInterrupt(irqno uint8) {
 			panic("can't set SWIRQ_STOP")
 		}
 		syscall.Close(fd)
+		switch irqno {
+		case 0:
+			b1 <- true
+		case 1:
+			b2 <- true
+		}
 	}
 }
 
