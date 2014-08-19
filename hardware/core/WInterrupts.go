@@ -40,7 +40,7 @@ func AttachInterrupt(irqno uint8, fn userFunc, modec int) {
 			fmt.Fprintf(os.Stderr, "attachInterrupt error: set interrupt %d to invalid mode\n", irqno)
 			return
 		}
-		switch irqno {
+		switch irqno { //TODO: impl signal
 		case 0:
 			// signal(SIGUSR1, (void (*) (int))userFunc);
 		case 1:
