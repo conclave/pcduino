@@ -1,3 +1,4 @@
+// ADC test program
 package main
 
 import (

@@ -1,3 +1,4 @@
+// I/O test program
 package main
 
 import (
