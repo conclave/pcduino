@@ -7,7 +7,7 @@ import (
 	"syscall"
 	"unsafe"
 
-	. "github.com/conclave/pcduino/hardware/core"
+	. "github.com/conclave/pcduino/core"
 )
 
 const I2CCLOCK_CHANGE = 0x0740

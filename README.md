@@ -5,8 +5,10 @@ pcduino.go: `go_environment` for pcDuino
 
 see [godoc](https://godoc.org/github.com/conclave/pcduino)
 
-- [hardware/core](https://godoc.org/github.com/conclave/pcduino/hardware/core)
-- [hardware/sunxi](https://godoc.org/github.com/conclave/pcduino/hardware/sunxi)
+- [core](https://godoc.org/github.com/conclave/pcduino/core)
+- [sunxi](https://godoc.org/github.com/conclave/pcduino/sunxi)
+- [lib/spi](https://godoc.org/github.com/conclave/pcduino/lib/spi)
+- [lib/wire](https://godoc.org/github.com/conclave/pcduino/lib/wire)
 
 ## Program Template
 
@@ -14,7 +16,7 @@ see [godoc](https://godoc.org/github.com/conclave/pcduino)
 package main
 
 import (
-  . "github.com/conclave/pcduino/hardware/core"
+  . "github.com/conclave/pcduino/core"
 )
 
 func init() {

@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"unsafe"
 
-	. "github.com/conclave/pcduino/hardware/sunxi"
+	. "github.com/conclave/pcduino/sunxi"
 )
 
 const (

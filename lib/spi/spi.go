@@ -5,8 +5,8 @@ import (
 	"syscall"
 	"unsafe"
 
-	. "github.com/conclave/pcduino/hardware/core"
-	. "github.com/conclave/pcduino/hardware/sunxi"
+	. "github.com/conclave/pcduino/core"
+	. "github.com/conclave/pcduino/sunxi"
 )
 
 const (

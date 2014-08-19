@@ -6,7 +6,7 @@ import (
 	"os"
 	"strconv"
 
-	. "github.com/conclave/pcduino/hardware/core"
+	. "github.com/conclave/pcduino/core"
 )
 
 const (
