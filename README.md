@@ -3,6 +3,7 @@ pcduino
 
 pcduino.go: `go_environment` for pcDuino
 
+see [godoc](https://godoc.org/github.com/conclave/pcduino)
 
 ## Program Template
 
