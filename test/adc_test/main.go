@@ -21,7 +21,6 @@ func main() {
 
 var adc_id int = 0
 
-// impl your own setup() and loop()
 func setup() {
 	flag.Parse()
 	if flag.NArg() != 1 {
