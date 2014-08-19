@@ -7,10 +7,10 @@ import (
 const SPI_IOC_MAGIC = 'k'
 
 type SPI_IOC_Transfer struct {
-	tx_buf, rx_buf           uint64
-	length, speed_hz         uint32
-	delay_usecs              uint16
-	bits_per_word, cs_change uint8
+	TX_buf, RX_buf           uint64
+	Length, Speed_hz         uint32
+	Delay_usecs              uint16
+	Bits_per_word, CS_change uint8
 	padding                  uint32
 }
 

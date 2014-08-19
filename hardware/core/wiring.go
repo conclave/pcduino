@@ -267,11 +267,11 @@ func SPI_adc_read_data(channel byte) int {
 	rxbuf := make([]byte, 2)
 	txbuf[0] = byte((reg_val >> 8)) & 0xFF
 	txbuf[1] = byte(reg_val) & 0xFF
-	transfer.tx_buf = uint64(uintptr(unsafe.Pointer(&txbuf)))
-	transfer.length = 2
-	transfer.speed_hz = 1000000
-	transfer.bits_per_word = 8
-	transfer.delay_usecs = 0xFFFF
+	transfer.TX_buf = uint64(uintptr(unsafe.Pointer(&txbuf)))
+	transfer.Length = 2
+	transfer.Speed_hz = 1000000
+	transfer.Bits_per_word = 8
+	transfer.Delay_usecs = 0xFFFF
 	if err = Ioctl(fd, SPI_IOC_MESSAGE(1), uintptr(unsafe.Pointer(&transfer))); err != nil {
 		panic("can't send spi message: " + err.Error())
 	}
@@ -282,12 +282,12 @@ func SPI_adc_read_data(channel byte) int {
 	DigitalWrite(SPIEX_CS, 1)
 	DelayMicrosends(10)
 	DigitalWrite(SPIEX_CS, 0)
-	transfer.tx_buf = 0
-	transfer.rx_buf = uint64(uintptr(unsafe.Pointer(&rxbuf)))
-	transfer.length = 2
-	transfer.speed_hz = 1000000
-	transfer.bits_per_word = 8
-	transfer.delay_usecs = 0xFFFF
+	transfer.TX_buf = 0
+	transfer.RX_buf = uint64(uintptr(unsafe.Pointer(&rxbuf)))
+	transfer.Length = 2
+	transfer.Speed_hz = 1000000
+	transfer.Bits_per_word = 8
+	transfer.Delay_usecs = 0xFFFF
 	if err = Ioctl(fd, SPI_IOC_MESSAGE(1), uintptr(unsafe.Pointer(&transfer))); err != nil {
 		panic("can't send spi message: " + err.Error())
 	}
