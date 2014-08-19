@@ -1,4 +1,35 @@
 pcduino
 =======
 
-pcduino.go
+pcduino.go: `go_environment` for pcDuino
+
+
+## Program Template
+
+```go
+package main
+
+import (
+  . "github.com/conclave/pcduino/hardware/core"
+)
+
+func init() {
+  Init()
+  setup()
+}
+
+func main() {
+  for {
+    loop()
+  }
+}
+
+// impl your own setup() and loop()
+func setup() {
+
+}
+
+func loop() {
+
+}
+```
