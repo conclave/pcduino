@@ -5,6 +5,9 @@ pcduino.go: `go_environment` for pcDuino
 
 see [godoc](https://godoc.org/github.com/conclave/pcduino)
 
+- [hardware/core](https://godoc.org/github.com/conclave/pcduino/hardware/core)
+- [hardware/sunxi](https://godoc.org/github.com/conclave/pcduino/hardware/sunxi)
+
 ## Program Template
 
 ```go
