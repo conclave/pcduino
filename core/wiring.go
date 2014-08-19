@@ -314,7 +314,7 @@ func AnalogRead(pin byte) int {
 			return -1
 		}
 		idx += len(str) + 1
-		s = s[idx:]
+		s = s[idx : len(s)-1]
 		if ret, err := strconv.Atoi(s); err != nil {
 			return -1
 		} else {
