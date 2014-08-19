@@ -55,13 +55,13 @@ func Init() {
 		name := fmt.Sprintf("%s%s%d", GPIO_PIN_DIR, GPIO_IF_PREFIX, i)
 		gpio_pin_fd[i], err = os.OpenFile(name, os.O_RDWR, 0644)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "open %s failed: %v\n", name, err)
+			fmt.Fprintf(os.Stderr, "%v\n", err)
 			return
 		}
 		name = fmt.Sprintf("%s%s%d", GPIO_MODE_DIR, GPIO_IF_PREFIX, i)
 		gpio_mode_fd[i], err = os.OpenFile(name, os.O_RDWR, 0644)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "open %s failed: %v\n", name, err)
+			fmt.Fprintf(os.Stderr, "%v\n", err)
 			return
 		}
 	}
@@ -69,7 +69,7 @@ func Init() {
 		name := fmt.Sprintf("%s%d", ADC_IF, i)
 		adc_fd[i], err = os.OpenFile(name, os.O_RDONLY, 0644)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "open %s failed: %v\n", name, err)
+			fmt.Fprintf(os.Stderr, "%v\n", err)
 			return
 		}
 	}
@@ -83,14 +83,6 @@ func write_to_file(fd *os.File, data []byte) error {
 		err = io.ErrShortWrite
 	}
 	return err
-}
-
-func ioctl(fd int, request, argp uintptr) error {
-	_, _, errno := syscall.Syscall(syscall.SYS_IOCTL, uintptr(fd), request, argp)
-	if errno == 0 {
-		return nil
-	}
-	return os.NewSyscallError("ioctl", errno)
 }
 
 func Hw_PinMode(pin, mode byte) {
@@ -116,7 +108,7 @@ func PinMode(pin, mode byte) {
 		}
 		defer syscall.Close(fd)
 		var val uint32 = uint32(pin)
-		if err = ioctl(fd, 0x102, uintptr(unsafe.Pointer(&val))); err != nil {
+		if err = Ioctl(fd, 0x102, uintptr(unsafe.Pointer(&val))); err != nil {
 			fmt.Fprintf(os.Stderr, "%v", err)
 			panic("can't set PWMTMR_STOP")
 		}

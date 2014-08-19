@@ -27,7 +27,3 @@ func DelayShed(ms time.Duration) {
 func DelayMicrosendsSched(us time.Duration) {
 	time.Sleep(us * time.Microsecond)
 }
-
-// func PAbort(s string) { // perror(s) + abort();
-
-// }

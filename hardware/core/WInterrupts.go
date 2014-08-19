@@ -20,7 +20,7 @@ const swirq_dev = "/dev/swirq"
 type SWIrq_Config struct {
 	channel   uint8
 	mode, pid int
-} // TODO: ioctl
+} // TODO: Ioctl
 
 type userFunc func()
 
@@ -53,15 +53,15 @@ func AttachInterrupt(irqno uint8, fn userFunc, modec int) {
 			fmt.Fprintf(os.Stderr, "open swirq device fail: %v\n", err)
 			os.Exit(-1)
 		}
-		if err = ioctl(fd, SWIRQ_STOP, uintptr(unsafe.Pointer(&irqno))); err != nil {
+		if err = Ioctl(fd, SWIRQ_STOP, uintptr(unsafe.Pointer(&irqno))); err != nil {
 			fmt.Fprintf(os.Stderr, "%v", err)
 			panic("can't set SWIRQ_STOP")
 		}
-		if err = ioctl(fd, SWIRQ_SETPID, uintptr(unsafe.Pointer(&irqconfig))); err != nil {
+		if err = Ioctl(fd, SWIRQ_SETPID, uintptr(unsafe.Pointer(&irqconfig))); err != nil {
 			fmt.Fprintf(os.Stderr, "%v", err)
 			panic("can't set SWIRQ_SETPID")
 		}
-		if err = ioctl(fd, SWIRQ_START, uintptr(unsafe.Pointer(&irqno))); err != nil {
+		if err = Ioctl(fd, SWIRQ_START, uintptr(unsafe.Pointer(&irqno))); err != nil {
 			fmt.Fprintf(os.Stderr, "%v", err)
 			panic("can't set SWIRQ_START")
 		}
@@ -76,7 +76,7 @@ func DetachInterrupt(irqno uint8) {
 			fmt.Fprintf(os.Stderr, "open swirq device fail: %v\n", err)
 			os.Exit(-1)
 		}
-		if err = ioctl(fd, SWIRQ_STOP, uintptr(unsafe.Pointer(&irqno))); err != nil {
+		if err = Ioctl(fd, SWIRQ_STOP, uintptr(unsafe.Pointer(&irqno))); err != nil {
 			fmt.Fprintf(os.Stderr, "%v", err)
 			panic("can't set SWIRQ_STOP")
 		}
@@ -91,12 +91,12 @@ func Interrupts() {
 		fmt.Fprintf(os.Stderr, "open swirq device fail: %v\n", err)
 		os.Exit(-1)
 	}
-	if err = ioctl(fd, SWIRQ_ENABLE, uintptr(unsafe.Pointer(&irqno))); err != nil {
+	if err = Ioctl(fd, SWIRQ_ENABLE, uintptr(unsafe.Pointer(&irqno))); err != nil {
 		fmt.Fprintf(os.Stderr, "%v", err)
 		panic("can't set interrupt_0 SWIRQ_ENABLE")
 	}
 	irqno = 1
-	if err = ioctl(fd, SWIRQ_ENABLE, uintptr(unsafe.Pointer(&irqno))); err != nil {
+	if err = Ioctl(fd, SWIRQ_ENABLE, uintptr(unsafe.Pointer(&irqno))); err != nil {
 		fmt.Fprintf(os.Stderr, "%v", err)
 		panic("can't set interrupt_1 SWIRQ_ENABLE")
 	}
@@ -110,12 +110,12 @@ func NoInterrupts() {
 		fmt.Fprintf(os.Stderr, "open swirq device fail: %v\n", err)
 		os.Exit(-1)
 	}
-	if err = ioctl(fd, SWIRQ_DISABLE, uintptr(unsafe.Pointer(&irqno))); err != nil {
+	if err = Ioctl(fd, SWIRQ_DISABLE, uintptr(unsafe.Pointer(&irqno))); err != nil {
 		fmt.Fprintf(os.Stderr, "%v", err)
 		panic("can't set interrupt_0 SWIRQ_DISABLE")
 	}
 	irqno = 1
-	if err = ioctl(fd, SWIRQ_DISABLE, uintptr(unsafe.Pointer(&irqno))); err != nil {
+	if err = Ioctl(fd, SWIRQ_DISABLE, uintptr(unsafe.Pointer(&irqno))); err != nil {
 		fmt.Fprintf(os.Stderr, "%v", err)
 		panic("can't set interrupt_1 SWIRQ_DISABLE")
 	}
