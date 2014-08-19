@@ -44,16 +44,16 @@ var adc_fd []*os.File
 var pwm_fd []*os.File
 
 func init() {
-	gpio_pin_fd = make([]*os.File, MAX_GPIO_NUM)
-	gpio_mode_fd = make([]*os.File, MAX_GPIO_NUM)
-	adc_fd = make([]*os.File, MAX_ADC_NUM)
+	gpio_pin_fd = make([]*os.File, MAX_GPIO_NUM+1)
+	gpio_mode_fd = make([]*os.File, MAX_GPIO_NUM+1)
+	adc_fd = make([]*os.File, MAX_ADC_NUM+1)
 }
 
 // wiring
 
 func Init() {
 	var err error
-	for i := 0; i < MAX_GPIO_NUM; i++ {
+	for i := 0; i <= MAX_GPIO_NUM; i++ {
 		name := fmt.Sprintf("%s%s%d", GPIO_PIN_DIR, GPIO_IF_PREFIX, i)
 		gpio_pin_fd[i], err = os.OpenFile(name, os.O_RDWR, 0644)
 		if err != nil {
@@ -67,7 +67,7 @@ func Init() {
 			return
 		}
 	}
-	for i := 0; i < 5; i++ { // why not MAX_ADC_NUM here?
+	for i := 0; i <= 5; i++ { // why not MAX_ADC_NUM here?
 		name := fmt.Sprintf("%s%d", ADC_IF, i)
 		adc_fd[i], err = os.OpenFile(name, os.O_RDONLY, 0644)
 		if err != nil {
