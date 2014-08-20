@@ -15,9 +15,15 @@ func main() {
 	}
 }
 
+var pin byte = 1
+
 func setup() {
+	PinMode(pin, OUTPUT)
 }
 
 func loop() {
-	Delay(100)
+	DigitalWrite(pin, HIGH) // set the LED on
+	Delay(1000)             // wait for a second
+	DigitalWrite(pin, LOW)  // set the LED off
+	Delay(1000)             // wait for a second
 }
