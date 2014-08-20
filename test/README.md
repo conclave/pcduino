@@ -6,6 +6,7 @@ These programs are modeled from c_environment's [sample](https://github.com/pcdu
 ## Done
 
 - adc_test
+- adxl345_test
 - io_test
 - linker_button_test
 - linker_buzzer_test
@@ -28,7 +29,6 @@ These programs are modeled from c_environment's [sample](https://github.com/pcdu
 
 ## WIP
 
-- adxl345_test
 - interrupt_test
 - liquidcrystal_i2c
 - liquidcrystal_spi
