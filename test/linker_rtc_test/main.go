@@ -29,22 +29,22 @@ func setup() {
 	wire.Begin()
 	getDateDS1307()
 	var second, minute, hour, dayOfWeek, dayOfMonth, month, year int
-	if flag.NArg() > 1 {
+	if flag.NArg() >= 1 {
 		year, _ = strconv.Atoi(flag.Arg(0))
 	}
-	if flag.NArg() > 2 {
+	if flag.NArg() >= 2 {
 		month, _ = strconv.Atoi(flag.Arg(1))
 	}
-	if flag.NArg() > 3 {
+	if flag.NArg() >= 3 {
 		dayOfMonth, _ = strconv.Atoi(flag.Arg(2))
 	}
-	if flag.NArg() > 4 {
+	if flag.NArg() >= 4 {
 		hour, _ = strconv.Atoi(flag.Arg(3))
 	}
-	if flag.NArg() > 5 {
+	if flag.NArg() >= 5 {
 		minute, _ = strconv.Atoi(flag.Arg(4))
 	}
-	if flag.NArg() > 6 {
+	if flag.NArg() >= 6 {
 		second, _ = strconv.Atoi(flag.Arg(5))
 	}
 	//force setting
