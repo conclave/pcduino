@@ -1,7 +1,7 @@
 pcduino
 =======
 
-pcduino.go: `go_environment` for pcDuino
+pcduino.go: `go_environment` for pcDuino [![Build Status](https://travis-ci.org/conclave/pcduino.svg)](https://travis-ci.org/conclave/pcduino)
 
 see [godoc](https://godoc.org/github.com/conclave/pcduino)
 
