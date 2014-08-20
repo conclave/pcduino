@@ -91,5 +91,5 @@ func getDateDS1307() {
 	dayOfMonth := bcdToDec(byte(wire.Read()))
 	month := bcdToDec(byte(wire.Read()))
 	year := bcdToDec(byte(wire.Read()))
-	fmt.Printf("%d:%d:%d %d %d/%d/%d.\n", hour, minute, second, dayOfWeek, month, dayOfMonth, year)
+	fmt.Printf("[%d] %d:%d:%d %d/%d/%d\n", dayOfWeek, hour, minute, second, month, dayOfMonth, year)
 }
