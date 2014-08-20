@@ -15,9 +15,17 @@ func main() {
 	}
 }
 
+var magneticPin byte = 1
+var ledPin byte = 0
+
 func setup() {
+	println("Magnetic sensor test code!")
+	println("Using I/O_0=Drive LED, I/O_1=Sensor output.")
+	PinMode(magneticPin, INPUT)
+	PinMode(ledPin, OUTPUT)
 }
 
 func loop() {
-	Delay(100)
+	value := DigitalRead(magneticPin)
+	DigitalWrite(ledPin, value)
 }
