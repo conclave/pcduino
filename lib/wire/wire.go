@@ -124,7 +124,7 @@ func (this *TwoWire) EndTransmission() int {
 	file := os.NewFile(uintptr(this.I2CHandle), "/dev/i2c-2")
 	n, err := file.Write(this.txBuffer)
 	if err != nil || n != len(this.txBuffer) {
-		fmt.Fprintf(os.Stderr, "i2c transaction failed\n")
+		fmt.Fprintf(os.Stderr, "i2c transaction failed. %d/%d written.\n", n, len(this.txBuffer))
 		ret = 4
 	} else {
 		ret = 0
