@@ -168,16 +168,18 @@ func (this *TwoWire) RequestFrom(address, quantity int) int {
 // slave tx event callback
 // or after BeginTransmission(address)
 func (this *TwoWire) Write(data []byte) int {
+	if this.txBufferIndex >= 32 {
+		return 0
+	}
 	ret := len(data)
 	if this.transmitting == 1 {
-		for i := 0; i < ret; i++ {
-			if this.txBufferIndex >= 32 {
-				// setWriteError()
-				break
-			}
-			this.txBuffer[this.txBufferIndex] = data[i]
-			this.txBufferIndex++
+		if this.txBufferIndex+ret > 32 {
+			ret = 32 - this.txBufferIndex
+			data = data[:ret]
 		}
+		copy(this.txBuffer[this.txBufferIndex:], data)
+		this.txBufferIndex += ret
+		this.txBuffer = this.txBuffer[:this.txBufferIndex]
 	}
 	return ret
 }
