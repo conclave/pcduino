@@ -1,9 +1,12 @@
+// +build arm
+
 package main
 
 import (
 	"flag"
 	"fmt"
 	"os"
+	"syscall"
 	"time"
 
 	. "github.com/conclave/pcduino/core"
@@ -11,7 +14,6 @@ import (
 )
 
 func init() {
-	Init()
 	setup()
 }
 
@@ -26,7 +28,15 @@ func main() {
 		}
 	}
 	if setTime {
-
+		if t := getDateDS1307(); t != nil {
+			tv := syscall.Timeval{
+				Sec:  int32(t.Unix()),
+				Usec: int32(t.UnixNano() % 100000000),
+			}
+			if err := syscall.Settimeofday(&tv); err != nil {
+				fmt.Fprintln(os.Stderr, err.Error())
+			}
+		}
 	}
 	if writeTime {
 		now := time.Now()
