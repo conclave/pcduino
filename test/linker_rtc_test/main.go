@@ -3,10 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 	"strconv"
 
 	. "github.com/conclave/pcduino/core"
-	. "github.com/conclave/pcduino/lib/wire"
+	. "github.com/conclave/pcduino/lib/i2c"
 )
 
 func init() {
@@ -21,12 +22,14 @@ func main() {
 }
 
 const DS1307_I2C_ADDRESS = 0x68 // This is the I2C address
-var wire *TwoWire
+var i2c *I2C
 
 func setup() {
 	flag.Parse()
-	wire = NewTwoWire()
-	wire.Begin()
+	var err error
+	if i2c, err = New(DS1307_I2C_ADDRESS, 2); err != nil {
+		panic(err.Error())
+	}
 	getDateDS1307()
 	var second, minute, hour, dayOfWeek, dayOfMonth, month, year int
 	if flag.NArg() >= 1 {
@@ -65,31 +68,32 @@ func bcdToDec(val byte) byte {
 }
 
 func setDateDS1307(second, minute, hour, dayOfWeek, dayOfMonth, month, year byte) {
-	wire.BeginTransmission(DS1307_I2C_ADDRESS)
-	wire.Write([]byte{0})
-	wire.Write([]byte{decToBcd(second)}) // 0 to bit 7 starts the clock
-	wire.Write([]byte{decToBcd(minute)})
-	wire.Write([]byte{decToBcd(hour)}) // If you want 12 hour am/pm you need to set
-	// bit 6 (also need to change readDateDs1307)
-	wire.Write([]byte{decToBcd(dayOfWeek)})
-	wire.Write([]byte{decToBcd(dayOfMonth)})
-	wire.Write([]byte{decToBcd(month)})
-	wire.Write([]byte{decToBcd(year)})
-	wire.EndTransmission()
+	// 0 to bit 7 starts the clock
+	// If you want 12 hour am/pm you need to set bit 6 of (hour) (also need to change getDateDS1307)
+	i2c.Write(0,
+		decToBcd(second),
+		decToBcd(minute),
+		decToBcd(hour),
+		decToBcd(dayOfWeek),
+		decToBcd(dayOfMonth),
+		decToBcd(month),
+		decToBcd(year))
 }
 
 func getDateDS1307() {
-	wire.BeginTransmission(DS1307_I2C_ADDRESS)
-	wire.Write([]byte{0})
-	wire.EndTransmission()
-	wire.RequestFrom(DS1307_I2C_ADDRESS, 7)
+	i2c.Write(0)
+	b := make([]byte, 7)
+	if err := i2c.Read(b); err != nil {
+		fmt.Fprintf(os.Stderr, "getDateDS1307: %v\n", err)
+		return
+	}
 	// A few of these need masks because certain bits are control bits
-	second := bcdToDec(byte(wire.Read() & 0x7f))
-	minute := bcdToDec(byte(wire.Read()))
-	hour := bcdToDec(byte(wire.Read() & 0x3f)) // Need to change this if 12 hour am/pm
-	dayOfWeek := bcdToDec(byte(wire.Read()))
-	dayOfMonth := bcdToDec(byte(wire.Read()))
-	month := bcdToDec(byte(wire.Read()))
-	year := bcdToDec(byte(wire.Read()))
-	fmt.Printf("[%d] %d:%d:%d %d/%d/%d\n", dayOfWeek, hour, minute, second, month, dayOfMonth, year)
+	second := bcdToDec(b[0] & 0x7f)
+	minute := bcdToDec(b[1])
+	hour := bcdToDec(b[2] & 0x3f) // Need to change this if 12 hour am/pm
+	_ = bcdToDec(b[3])
+	dayOfMonth := bcdToDec(b[4])
+	month := bcdToDec(b[5])
+	year := bcdToDec(b[6])
+	fmt.Printf("%% %d:%d:%d %d/%d/%d\n", hour, minute, second, month, dayOfMonth, year)
 }
