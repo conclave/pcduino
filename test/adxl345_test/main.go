@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	. "github.com/conclave/pcduino/core"
-	. "github.com/conclave/pcduino/lib/wire"
+	. "github.com/conclave/pcduino/lib/i2c"
 )
 
 const (
@@ -94,11 +94,13 @@ func main() {
 	}
 }
 
-var wire *TwoWire
+var i2c *I2C
 
 func setup() {
-	wire = NewTwoWire()
-	wire.Begin()
+	var err error
+	if i2c, err = New(ADXL345_SLAVE_ADDR, 2); err != nil {
+		panic(err.Error())
+	}
 	fmt.Printf("dev id=0x%x\r\n", read8(0x0))
 	//powerOn();
 	write8(ADXL345_POWER_CTL, 0)
@@ -141,37 +143,22 @@ func loop() {
 	Delay(200000)
 }
 
-func write8(reg int, value byte) {
-	wire.BeginTransmission(ADXL345_SLAVE_ADDR)
-	wire.Write([]byte{byte(reg)})
-	wire.Write([]byte{value})
-	wire.EndTransmission()
+func write8(reg byte, value byte) {
+	i2c.Write(reg, value)
 }
 
-func read8(reg int) byte {
-	wire.BeginTransmission(ADXL345_SLAVE_ADDR)
-	wire.Write([]byte{byte(reg)})
-	wire.EndTransmission()
-	wire.RequestFrom(ADXL345_SLAVE_ADDR, 1)
-	val := 0
-	for wire.Available() != 0 {
-		val = wire.Read()
-	}
-	return byte(val)
+func read8(reg byte) byte {
+	b := []byte{0}
+	i2c.Write(reg)
+	i2c.Read(b)
+	return b[0]
 }
 
-func read16(reg int) uint16 {
-	wire.BeginTransmission(ADXL345_SLAVE_ADDR)
-	wire.Write([]byte{byte(reg)})
-	wire.EndTransmission()
-	wire.RequestFrom(ADXL345_SLAVE_ADDR, 2)
-	val := make([]int, 10)
-	i := 0
-	for wire.Available() != 0 {
-		val[i] = wire.Read()
-		i++
-	}
-	return uint16(val[0] | (val[1] << 8))
+func read16(reg byte) uint16 {
+	b := []byte{0, 0}
+	i2c.Write(reg)
+	i2c.Read(b)
+	return uint16(b[0]) | uint16(b[1]<<8)
 }
 
 func readXYZ() {
@@ -181,7 +168,7 @@ func readXYZ() {
 	fmt.Printf("x=%d, y=%d, z=%d\n", x, y, z)
 }
 
-func setRegisterBit(reg int, bit, high byte) {
+func setRegisterBit(reg, bit, high byte) {
 	value := read8(reg)
 	if high != 0 {
 		value |= (1 << bit)
