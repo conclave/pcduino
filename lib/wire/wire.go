@@ -1,4 +1,5 @@
 // TwoWire - TWI/I2C library for Wiring
+// deprecated
 package wire
 
 import (
