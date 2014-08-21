@@ -16,6 +16,9 @@ func init() {
 }
 
 func main() {
+	if readOnce {
+		return
+	}
 	for {
 		loop()
 	}
@@ -23,35 +26,41 @@ func main() {
 
 const DS1307_I2C_ADDRESS = 0x68 // This is the I2C address
 var i2c *I2C
+var readOnce bool
 
 func setup() {
+	var setTime bool
+	flag.BoolVar(&setTime, "s", false, "set date")
+	flag.BoolVar(&readOnce, "once", false, "read once")
 	flag.Parse()
 	var err error
 	if i2c, err = New(DS1307_I2C_ADDRESS, 2); err != nil {
 		panic(err.Error())
 	}
 	getDateDS1307()
-	var second, minute, hour, dayOfWeek, dayOfMonth, month, year int
-	if flag.NArg() >= 1 {
-		year, _ = strconv.Atoi(flag.Arg(0))
+	if setTime {
+		var second, minute, hour, dayOfWeek, dayOfMonth, month, year int
+		if flag.NArg() >= 1 {
+			year, _ = strconv.Atoi(flag.Arg(0))
+		}
+		if flag.NArg() >= 2 {
+			month, _ = strconv.Atoi(flag.Arg(1))
+		}
+		if flag.NArg() >= 3 {
+			dayOfMonth, _ = strconv.Atoi(flag.Arg(2))
+		}
+		if flag.NArg() >= 4 {
+			hour, _ = strconv.Atoi(flag.Arg(3))
+		}
+		if flag.NArg() >= 5 {
+			minute, _ = strconv.Atoi(flag.Arg(4))
+		}
+		if flag.NArg() >= 6 {
+			second, _ = strconv.Atoi(flag.Arg(5))
+		}
+		fmt.Printf("set date - %d:%d:%d %d/%d/%d\n", hour, minute, second, month, dayOfMonth, year)
+		setDateDS1307(byte(second), byte(minute), byte(hour), byte(dayOfWeek), byte(dayOfMonth), byte(month), byte(year))
 	}
-	if flag.NArg() >= 2 {
-		month, _ = strconv.Atoi(flag.Arg(1))
-	}
-	if flag.NArg() >= 3 {
-		dayOfMonth, _ = strconv.Atoi(flag.Arg(2))
-	}
-	if flag.NArg() >= 4 {
-		hour, _ = strconv.Atoi(flag.Arg(3))
-	}
-	if flag.NArg() >= 5 {
-		minute, _ = strconv.Atoi(flag.Arg(4))
-	}
-	if flag.NArg() >= 6 {
-		second, _ = strconv.Atoi(flag.Arg(5))
-	}
-	//force setting
-	setDateDS1307(byte(second), byte(minute), byte(hour), byte(dayOfWeek), byte(dayOfMonth), byte(month), byte(year))
 }
 
 func loop() {
@@ -95,5 +104,7 @@ func getDateDS1307() {
 	dayOfMonth := bcdToDec(b[4])
 	month := bcdToDec(b[5])
 	year := bcdToDec(b[6])
-	fmt.Printf("%% %d:%d:%d %d/%d/%d\n", hour, minute, second, month, dayOfMonth, year)
+	// fmt.Printf("%% %d:%d:%d %d/%d/%d\n", hour, minute, second, month, dayOfMonth, year)
+	// pattern => 2013-11-19 15:11:40
+	fmt.Printf("20%d-%d-%d %d:%d:%d\n", year, month, dayOfMonth, hour, minute, second)
 }
