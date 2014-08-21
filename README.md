@@ -7,8 +7,8 @@ see [godoc](https://godoc.org/github.com/conclave/pcduino)
 
 - [core](https://godoc.org/github.com/conclave/pcduino/core)
 - [sunxi](https://godoc.org/github.com/conclave/pcduino/sunxi)
+- [lib/i2c](https://godoc.org/github.com/conclave/pcduino/lib/i2c)
 - [lib/spi](https://godoc.org/github.com/conclave/pcduino/lib/spi)
-- [lib/wire](https://godoc.org/github.com/conclave/pcduino/lib/wire)
 
 ## Program Template
 
