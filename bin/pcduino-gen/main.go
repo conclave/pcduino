@@ -8,8 +8,7 @@ import (
 	"strings"
 )
 
-const template = `
-package main
+const template = `package main
 
 import (
   . "github.com/conclave/pcduino/core"
@@ -65,5 +64,10 @@ func main() {
 		return
 	}
 	_, err = io.WriteString(file, template)
+	file.Close()
+	if file, err = os.Create(".gitignore"); err != nil {
+		return
+	}
+	_, err = io.WriteString(file, package_name+"\n")
 	return
 }
