@@ -192,12 +192,12 @@ func ShiftIn(dataPin, clockPin, bitOrder byte) byte {
 	var value byte = 0
 	PinMode(clockPin, OUTPUT)
 	PinMode(dataPin, INPUT)
-	for i := 0; i < 8; i++ {
+	for i := uint(0); i < 8; i++ {
 		DigitalWrite(clockPin, HIGH)
 		if bitOrder == LSBFIRST {
-			value |= (DigitalRead(dataPin) << uint(i))
+			value |= (DigitalRead(dataPin) << i)
 		} else {
-			value |= (DigitalRead(dataPin) << uint(7-i))
+			value |= (DigitalRead(dataPin) << (7 - i))
 		}
 		DigitalWrite(clockPin, LOW)
 	}
@@ -207,11 +207,11 @@ func ShiftIn(dataPin, clockPin, bitOrder byte) byte {
 func ShiftOut(dataPin, clockPin, bitOrder, value byte) {
 	PinMode(clockPin, OUTPUT)
 	PinMode(dataPin, OUTPUT)
-	for i := 0; i < 8; i++ {
+	for i := uint(0); i < 8; i++ {
 		if bitOrder == LSBFIRST {
-			DigitalWrite(dataPin, (value & (1 << uint(i))))
+			DigitalWrite(dataPin, (value&(1<<i))&0x01)
 		} else {
-			DigitalWrite(dataPin, (value & (1 << uint(7-i))))
+			DigitalWrite(dataPin, (value&(1<<(7-i)))&0x01)
 		}
 		DigitalWrite(clockPin, HIGH)
 		DigitalWrite(clockPin, LOW)
