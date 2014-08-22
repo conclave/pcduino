@@ -1,8 +1,6 @@
 package pcd8544
 
 import (
-	"math"
-
 	. "github.com/conclave/pcduino/core"
 )
 
@@ -21,33 +19,37 @@ const (
 	PCD8544_DISPLAYNORMAL       = 0x4
 	PCD8544_DISPLAYALLON        = 0x1
 	PCD8544_DISPLAYINVERTED     = 0x5
-	// H = 0
-	PCD8544_FUNCTIONSET    = 0x20
-	PCD8544_DISPLAYCONTROL = 0x08
-	PCD8544_SETYADDR       = 0x40
-	PCD8544_SETXADDR       = 0x80
-	// H = 1
-	PCD8544_SETTEMP = 0x04
-	PCD8544_SETBIAS = 0x10
-	PCD8544_SETVOP  = 0x80
+	PCD8544_FUNCTIONSET         = 0x20
+	PCD8544_DISPLAYCONTROL      = 0x08
+	PCD8544_SETYADDR            = 0x40
+	PCD8544_SETXADDR            = 0x80
+	PCD8544_SETTEMP             = 0x04
+	PCD8544_SETBIAS             = 0x10
+	PCD8544_SETVOP              = 0x80
 )
 
 type LCD struct {
-	buffer                                         []byte
-	din, clk, dc, rst, cs                          byte
-	contrast                                       byte
-	x, y                                           byte
-	size, color                                    byte
-	xUpdateMin, xUpdateMax, yUpdateMin, yUpdateMax byte
+	buffer                []byte
+	din, clk, dc, rst, cs byte
+	contrast              byte
+	x, y                  byte
+	size, color           byte
 }
 
 func init() {
 }
 
+func abs(a, b byte) byte {
+	if a > b {
+		return a - b
+	}
+	return b - a
+}
+
 func New(din, clk, dc, rst, cs, contrast byte) *LCD {
 	b := make([]byte, LCDWIDTH*LCDHEIGHT/8)
 	return &LCD{
-		b, din, clk, dc, rst, cs, contrast, 0, 0, 1, BLACK, 0, 0, 0, 0,
+		b, din, clk, dc, rst, cs, contrast, 0, 0, 1, BLACK,
 	}
 }
 
@@ -57,11 +59,9 @@ func (this *LCD) Init() {
 	PinMode(this.dc, OUTPUT)
 	PinMode(this.rst, OUTPUT)
 	PinMode(this.cs, OUTPUT)
-	if this.cs > 0 {
-		DigitalWrite(this.cs, LOW)
-	}
+	DigitalWrite(this.cs, LOW)
 	DigitalWrite(this.rst, LOW)
-	Delay(500)
+	DelayMicrosends(10)
 	DigitalWrite(this.rst, HIGH)
 	// get into extended mode
 	this.Command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION)
@@ -76,96 +76,39 @@ func (this *LCD) Init() {
 	this.Command(PCD8544_FUNCTIONSET)
 	// set display to normal
 	this.Command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYNORMAL)
-	// set up a bounding box for screen updates
-	this.UpdateBoundingBox(0, 0, LCDWIDTH-1, LCDHEIGHT-1)
+	DelayMicrosends(10)
+	this.logo()
 }
 
-func (this *LCD) Display() {
-	var p byte
-	for p = 0; p < 6; p++ {
-		if this.yUpdateMin >= (p+1)*8 {
-			continue
-		}
-		if this.yUpdateMax < p*8 {
-			break
-		}
-		this.Command(PCD8544_SETYADDR | p)
-		col := this.xUpdateMin
-		maxcol := this.xUpdateMax
-		this.Command(PCD8544_SETXADDR | col)
-		for ; col <= maxcol; col++ {
-			this.Data(this.buffer[LCDWIDTH*p+col])
+func (this *LCD) DrawBitmap(x, y byte, bitmap []byte, w, h, color byte) {
+	var i, j byte
+	for j = 0; j < h; j++ {
+		for i = 0; i < w; i++ {
+			if bitmap[i+(j/8)*w]&(1<<(j%8)) != 0 {
+				this.SetPixel(x+i, y+j, color)
+			}
 		}
 	}
-	this.Command(PCD8544_SETYADDR)
-	this.xUpdateMin = LCDWIDTH - 1
-	this.xUpdateMax = 0
-	this.yUpdateMin = LCDHEIGHT - 1
-	this.yUpdateMax = 0
 }
 
-func (this *LCD) UpdateBoundingBox(xmin, ymin, xmax, ymax byte) {
-	if xmin < this.xUpdateMin {
-		this.xUpdateMin = xmin
-	}
-	if xmax > this.xUpdateMax {
-		this.xUpdateMax = xmax
-	}
-	if ymin < this.yUpdateMin {
-		this.yUpdateMin = ymin
-	}
-	if ymax > this.yUpdateMax {
-		this.yUpdateMax = ymax
-	}
-}
-
-func (this *LCD) ShowLogo() {
-	copy(this.buffer, pi_logo)
-	this.Display()
-}
-
-func (this *LCD) SetCursor(x, y byte) {
-	this.x = x
-	this.y = y
-}
-
-func (this *LCD) SetPixel(x, y, color byte) {
-	if x >= LCDWIDTH || y >= LCDHEIGHT {
+func (this *LCD) DrawString(x, y byte, c interface{}) {
+	switch c.(type) {
+	case string:
+		v := c.(string)
+		this.x = x
+		this.y = y
+		for i := 0; i < len(v); i++ {
+			this.Write(v[i])
+		}
+	case []byte:
+		v := c.([]byte)
+		this.x = x
+		this.y = y
+		for i := 0; i < len(v); i++ {
+			this.Write(v[i])
+		}
+	default:
 		return
-	}
-	if color != 0 {
-		this.buffer[x+(y/8)*LCDWIDTH] |= (1 << (y % 8))
-	} else {
-		this.buffer[x+(y/8)*LCDWIDTH] &= ^(1 << (y % 8))
-	}
-	// this.UpdateBoundingBox(x, y, x, y)
-}
-
-func (this *LCD) GetPixel(x, y byte) byte {
-	if x >= LCDWIDTH || y >= LCDHEIGHT {
-		return 0
-	}
-	return (this.buffer[x+(y/8)*LCDWIDTH] >> (7 - (y % 8))) & 0x1
-}
-
-func (this *LCD) SPIwrite(c byte) {
-	ShiftOut(this.din, this.clk, MSBFIRST, c)
-}
-
-func (this *LCD) FillRect(x, y, w, h, color byte) {
-	for i := x; i < x+w; i++ {
-		for j := y; j < y+h; j++ {
-			this.SetPixel(i, j, color)
-		}
-	}
-	this.UpdateBoundingBox(x, y, x+w, y+h)
-}
-
-func (this *LCD) DrawString(x, y byte, c []byte) {
-	this.x = x
-	this.y = y
-	for i := 0; i < len(c); i++ {
-		this.Write(c[i])
 	}
 }
 
@@ -178,7 +121,7 @@ func (this *LCD) DrawChar(x, y byte, c byte) {
 	}
 	var i, j byte
 	for i = 0; i < 5; i++ {
-		d := font[c*5+byte(i)]
+		d := font[int(c)*5+int(i)]
 		for j = 0; j < 8; j++ {
 			if d&(1<<uint(j)) != 0 {
 				this.SetPixel(x+i, y+j, this.color)
@@ -190,11 +133,33 @@ func (this *LCD) DrawChar(x, y byte, c byte) {
 	for j = 0; j < 8; j++ {
 		this.SetPixel(x+5, y+j, 1-this.color)
 	}
-	this.UpdateBoundingBox(x, y, x+5, y+8)
+}
+
+func (this *LCD) Write(c byte) {
+	if c == '\n' {
+		this.y += this.size * 8
+		this.x = 0
+	} else if c == '\r' {
+	} else {
+		this.DrawChar(this.x, this.y, c)
+		this.x += this.size * 6
+		if this.x >= (LCDWIDTH - 5) {
+			this.x = 0
+			this.y += 8
+		}
+		if this.y >= LCDHEIGHT {
+			this.y = 0
+		}
+	}
+}
+
+func (this *LCD) SetCursor(x, y byte) {
+	this.x = x
+	this.y = y
 }
 
 func (this *LCD) DrawLine(x0, y0, x1, y1, color byte) {
-	p := math.Abs(float64(y1-y0)) > math.Abs(float64(x1-x0))
+	p := abs(y1, y0) > abs(x1, x0)
 	if p {
 		x0, y0 = y0, x0
 		x1, y1 = y1, x1
@@ -203,7 +168,6 @@ func (this *LCD) DrawLine(x0, y0, x1, y1, color byte) {
 		x0, x1 = x1, x0
 		y0, y1 = y1, y0
 	}
-	this.UpdateBoundingBox(x0, y0, x1, y1)
 	dx := x1 - x0
 	var dy, ystep byte
 	if y1 > y0 {
@@ -226,19 +190,14 @@ func (this *LCD) DrawLine(x0, y0, x1, y1, color byte) {
 			er += dx
 		}
 	}
-
 }
 
-func (this *LCD) DrawBitmap(x, y byte, bitmap []byte, w, h, color byte) {
-	var i, j byte
-	for j = 0; j < h; j++ {
-		for i = 0; i < w; i++ {
-			if bitmap[i+(j/8)*w]&(1<<(j%8)) != 0 {
-				this.SetPixel(x+i, y+j, color)
-			}
+func (this *LCD) FillRect(x, y, w, h, color byte) {
+	for i := x; i < x+w; i++ {
+		for j := y; j < y+h; j++ {
+			this.SetPixel(i, j, color)
 		}
 	}
-	this.UpdateBoundingBox(x, y, x+w, y+h)
 }
 
 func (this *LCD) DrawRect(x, y, w, h, color byte) {
@@ -250,11 +209,9 @@ func (this *LCD) DrawRect(x, y, w, h, color byte) {
 		this.SetPixel(x, i, color)
 		this.SetPixel(x+w-1, i, color)
 	}
-	this.UpdateBoundingBox(x, y, x+w, y+h)
 }
 
 func (this *LCD) DrawCircle(x0, y0, r, color byte) {
-	this.UpdateBoundingBox(x0-r, y0-r, x0+r, y0+r)
 	f := 1 - r
 	ddF_x := byte(1)
 	ddF_y := -int8(2 * r)
@@ -276,20 +233,79 @@ func (this *LCD) DrawCircle(x0, y0, r, color byte) {
 	}
 }
 
-func (this *LCD) Write(c byte) {
-	if c == '\n' {
-		this.y += this.size * 8
-		this.x = 0
-	} else if c == '\r' {
-	} else {
-		this.DrawChar(this.x, this.y, c)
-		this.x += this.size * 6
-		if this.x >= (LCDWIDTH - 5) {
-			this.x = 0
-			this.y += 8
+func (this *LCD) FillCircle(x0, y0, r, color byte) {
+	f := 1 - r
+	ddF_x := byte(1)
+	ddF_y := -int8(2 * r)
+	x := byte(0)
+	y := r
+	for i := y0 - r; i <= y0+r; i++ {
+		this.SetPixel(x0, i, color)
+	}
+	for x < y {
+		if f >= 0 {
+			y--
+			ddF_y += 2
+			f += byte(ddF_y)
 		}
-		if this.y >= LCDHEIGHT {
-			this.y = 0
+		x++
+		ddF_x += 2
+		f += ddF_x
+		for j := y0 - y; j < y0+y; j++ {
+			this.SetPixel(x0+x, j, color)
+			this.SetPixel(x0-x, j, color)
+		}
+		for j := y0 - x; j <= y0+x; j++ {
+			this.SetPixel(x0+y, j, color)
+			this.SetPixel(x0-y, j, color)
+		}
+	}
+}
+
+func (this *LCD) SetPixel(x, y, color byte) {
+	if x >= LCDWIDTH || y >= LCDHEIGHT {
+		return
+	}
+	if color != 0 {
+		this.buffer[int(x)+int(y/8)*LCDWIDTH] |= (1 << (y % 8))
+	} else {
+		this.buffer[int(x)+int(y/8)*LCDWIDTH] &= ^(1 << (y % 8))
+	}
+}
+
+func (this *LCD) GetPixel(x, y byte) byte {
+	if x >= LCDWIDTH || y >= LCDHEIGHT {
+		return 0
+	}
+	return (this.buffer[int(x)+int(y/8)*LCDWIDTH] >> (7 - (y % 8))) & 0x1
+}
+
+func (this *LCD) Command(c byte) {
+	DigitalWrite(this.dc, LOW)
+	ShiftOut(this.din, this.clk, MSBFIRST, c)
+}
+
+func (this *LCD) Data(c byte) {
+	DigitalWrite(this.dc, HIGH)
+	ShiftOut(this.din, this.clk, MSBFIRST, c)
+}
+
+func (this *LCD) SetContrast(val byte) {
+	if val > 0x7F {
+		val = 0x7F
+	}
+	this.contrast = val
+	this.Command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION)
+	this.Command(PCD8544_SETVOP | val)
+	this.Command(PCD8544_FUNCTIONSET)
+}
+
+func (this *LCD) Display() {
+	for p := 0; p < 6; p++ {
+		this.Command(byte(PCD8544_SETYADDR | p))
+		this.Command(PCD8544_SETXADDR) // byte(PCD8544_SETXADDR | col)
+		for col := 0; col < LCDWIDTH; col++ {
+			this.Data(this.buffer[LCDWIDTH*p+col])
 		}
 	}
 }
@@ -298,28 +314,18 @@ func (this *LCD) Clear() {
 	for i := 0; i < LCDWIDTH*LCDHEIGHT/8; i++ {
 		this.buffer[i] = 0
 	}
-	this.UpdateBoundingBox(0, 0, LCDWIDTH-1, LCDHEIGHT-1)
 	this.x = 0
 	this.y = 0
 }
 
-func (this *LCD) Command(c byte) {
-	DigitalWrite(this.dc, LOW)
-	this.SPIwrite(c)
-}
-
-func (this *LCD) Data(c byte) {
-	DigitalWrite(this.dc, HIGH)
-	this.SPIwrite(c)
-}
-
-func (this *LCD) SetContrast(val byte) {
-	if val > 0x7F {
-		val = 0x7F
+func (this *LCD) logo() {
+	for p := 0; p < 6; p++ {
+		this.Command(byte(PCD8544_SETYADDR | p))
+		this.Command(PCD8544_SETXADDR) // byte(PCD8544_SETXADDR | col)
+		for col := 0; col < LCDWIDTH; col++ {
+			this.Data(pi_logo[LCDWIDTH*p+col])
+		}
 	}
-	this.Command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION)
-	this.Command(PCD8544_SETVOP | val)
-	this.Command(PCD8544_FUNCTIONSET)
 }
 
 var font = []byte{
