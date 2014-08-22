@@ -39,3 +39,9 @@ func loop() {
 
 }
 ```
+
+Or use `bin/pcduino-gen`:
+
+```shell
+pcduino-gen mypackage filename.go
+```
