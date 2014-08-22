@@ -9,7 +9,6 @@ import (
 	"syscall"
 	"time"
 
-	. "github.com/conclave/pcduino/core"
 	. "github.com/conclave/pcduino/lib/i2c"
 )
 
@@ -42,7 +41,7 @@ func main() {
 		now := time.Now()
 		fmt.Println("set time -", now)
 		setDateDS1307(&now)
-		Delay(100)
+		time.Sleep(100 * time.Millisecond)
 		if t := getDateDS1307(); t != nil {
 			fmt.Println(t)
 		}
