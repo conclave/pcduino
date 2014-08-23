@@ -48,19 +48,22 @@ func main() {
 	}
 }
 
-const DS1307_I2C_ADDRESS = 0x68 // This is the I2C address
 var i2c *I2C
 var readTime bool
 var setTime bool
 var writeTime bool
 
 func setup() {
+	var addr uint
+	var bus int
 	flag.BoolVar(&readTime, "r", false, "read hardware clock and print result")
 	flag.BoolVar(&setTime, "s", false, "set the system time from the hardware clock")
 	flag.BoolVar(&writeTime, "w", false, "set the hardware clock from the current system time")
+	flag.UintVar(&addr, "addr", 0x68, "specifiy i2c address")
+	flag.IntVar(&bus, "bus", 2, "specifiy i2c bus")
 	flag.Parse()
 	var err error
-	if i2c, err = New(DS1307_I2C_ADDRESS, 2); err != nil {
+	if i2c, err = New(addr, bus); err != nil {
 		panic(err.Error())
 	}
 }
