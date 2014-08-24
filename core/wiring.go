@@ -209,9 +209,9 @@ func ShiftOut(dataPin, clockPin, bitOrder, value byte) {
 	PinMode(dataPin, OUTPUT)
 	for i := uint(0); i < 8; i++ {
 		if bitOrder == LSBFIRST {
-			DigitalWrite(dataPin, (value&(1<<i))&0x01)
+			DigitalWrite(dataPin, ((value >> i) & 0x01))
 		} else {
-			DigitalWrite(dataPin, (value&(1<<(7-i)))&0x01)
+			DigitalWrite(dataPin, ((value >> (7 - i)) & 0x01))
 		}
 		DigitalWrite(clockPin, HIGH)
 		DigitalWrite(clockPin, LOW)
