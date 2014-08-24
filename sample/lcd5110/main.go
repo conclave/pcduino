@@ -3,6 +3,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net"
 	"os"
@@ -37,8 +38,11 @@ func init() {
 var lcd *pcd8544.LCD
 var hostname string
 var addr string
+var step int64
 
 func main() {
+	flag.Int64Var(&step, "step", 5000, "clock step")
+	flag.Parse()
 	lcd = pcd8544.New(1, 0, 2, 4, 3, 60)
 	lcd.Init()
 	Delay(500)
@@ -59,5 +63,5 @@ func loop() {
 	lcd.DrawString(0, 36, addr)
 	lcd.DrawLine(0, 45, 83, 45, pcd8544.BLACK)
 	lcd.Display()
-	Delay(5000)
+	Delay(time.Duration(step))
 }

@@ -1,6 +1,8 @@
 package pcd8544
 
 import (
+	"fmt"
+
 	. "github.com/conclave/pcduino/core"
 )
 
@@ -81,11 +83,10 @@ func (this *LCD) Init() {
 }
 
 func (this *LCD) DrawBitmap(x, y byte, bitmap []byte, w, h, color byte) {
-	var i, j byte
-	for j = 0; j < h; j++ {
-		for i = 0; i < w; i++ {
-			if bitmap[i+(j/8)*w]&(1<<(j%8)) != 0 {
-				this.SetPixel(x+i, y+j, color)
+	for j := 0; j < int(h); j++ {
+		for i := 0; i < int(w); i++ {
+			if bitmap[i+(j/8)*int(w)]&(1<<uint(j%8)) != 0 {
+				this.SetPixel(x+byte(i), y+byte(j), color)
 			}
 		}
 	}
@@ -108,7 +109,7 @@ func (this *LCD) DrawString(x, y byte, c interface{}) {
 			this.Write(v[i])
 		}
 	default:
-		return
+		this.DrawString(x, y, fmt.Sprintf("%v", c))
 	}
 }
 
@@ -185,7 +186,7 @@ func (this *LCD) DrawLine(x0, y0, x1, y1, color byte) {
 			this.SetPixel(x0, y0, color)
 		}
 		er -= dy
-		if er < 0 {
+		if er >= 0x80 {
 			y0 += ystep
 			er += dx
 		}
@@ -222,7 +223,7 @@ func (this *LCD) DrawCircle(x0, y0, r, color byte) {
 	this.SetPixel(x0+r, y0, color)
 	this.SetPixel(x0-r, y0, color)
 	for x < y {
-		if f >= 0 {
+		if f < 0x80 {
 			y--
 			ddF_y += 2
 			f += byte(ddF_y)
@@ -243,7 +244,7 @@ func (this *LCD) FillCircle(x0, y0, r, color byte) {
 		this.SetPixel(x0, i, color)
 	}
 	for x < y {
-		if f >= 0 {
+		if f < 0x80 {
 			y--
 			ddF_y += 2
 			f += byte(ddF_y)
