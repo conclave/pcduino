@@ -1,4 +1,4 @@
-package sunxi
+package core
 
 const (
 	MAX_GPIO_NUM      = 23

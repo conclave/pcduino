@@ -6,7 +6,6 @@ import (
 	"unsafe"
 
 	. "github.com/conclave/pcduino/core"
-	. "github.com/conclave/pcduino/sunxi"
 )
 
 const (

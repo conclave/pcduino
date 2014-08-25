@@ -8,8 +8,6 @@ import (
 	"strings"
 	"syscall"
 	"unsafe"
-
-	. "github.com/conclave/pcduino/sunxi"
 )
 
 const (

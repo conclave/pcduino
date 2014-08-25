@@ -6,9 +6,9 @@ pcduino.go: `go_environment` for pcDuino [![Build Status](https://travis-ci.org/
 see [godoc](https://godoc.org/github.com/conclave/pcduino)
 
 - [core](https://godoc.org/github.com/conclave/pcduino/core)
-- [sunxi](https://godoc.org/github.com/conclave/pcduino/sunxi)
 - [lib/i2c](https://godoc.org/github.com/conclave/pcduino/lib/i2c)
 - [lib/spi](https://godoc.org/github.com/conclave/pcduino/lib/spi)
+- [module/pcd8544](https://godoc.org/github.com/conclave/pcduino/module/pcd8544)
 
 ## Program Template
 
