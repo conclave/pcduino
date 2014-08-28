@@ -130,7 +130,7 @@ func (this *LCD) SetCursor(col, row byte) {
 }
 
 func (this *LCD) NoDisplay() {
-	this.ctrl &= ^LCD_DISPLAYON + 0xFF + 1
+	this.ctrl = byte(int8(^LCD_DISPLAYON) & int8(this.ctrl))
 	this.command(LCD_DISPLAYCONTROL | this.ctrl)
 }
 
@@ -140,7 +140,7 @@ func (this *LCD) Display() {
 }
 
 func (this *LCD) NoCursor() {
-	this.ctrl &= ^LCD_CURSORON + 0xFF + 1
+	this.ctrl = byte(int8(^LCD_CURSORON) & int8(this.ctrl))
 	this.command(LCD_DISPLAYCONTROL | this.ctrl)
 }
 
@@ -150,7 +150,7 @@ func (this *LCD) Cursor() {
 }
 
 func (this *LCD) NoBlink() {
-	this.ctrl &= ^LCD_BLINKON + 0xFF + 1
+	this.ctrl = byte(int8(^LCD_BLINKON) & int8(this.ctrl))
 	this.command(LCD_DISPLAYCONTROL | this.ctrl)
 }
 
@@ -175,7 +175,7 @@ func (this *LCD) LeftToRight() {
 
 // This is for text that flows Right to Left
 func (this *LCD) RightToLeft() {
-	this.mode &= ^LCD_ENTRYLEFT + 0xFF + 1
+	this.mode = byte(int8(^LCD_ENTRYLEFT) & int8(this.mode))
 	this.command(LCD_ENTRYMODESET | this.mode)
 }
 
@@ -187,7 +187,7 @@ func (this *LCD) AutoScroll() {
 
 // This will 'left justify' text from the cursor
 func (this *LCD) NoAutoScroll() {
-	this.mode &= ^LCD_ENTRYSHIFTINCREMENT + 0xFF + 1
+	this.mode = byte(int8(^LCD_ENTRYSHIFTINCREMENT) & int8(this.mode))
 	this.command(LCD_ENTRYMODESET | this.mode)
 }
 
