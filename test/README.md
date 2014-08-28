@@ -23,6 +23,10 @@ These programs are modeled from c_environment's [sample](https://github.com/pcdu
 - linker_temperature_sensor_test
 - linker_tilt_test
 - linker_touch_sensor_test
+- pn532_readAllMemoryBlocks
+- pn532readMifareMemory
+- pn532readMifareTargetID
+- pn532writeMifareMemory
 - MQ2
 - pwm_test
 - spi_test
@@ -32,9 +36,5 @@ These programs are modeled from c_environment's [sample](https://github.com/pcdu
 - interrupt_test
 - liquidcrystal_i2c
 - liquidcrystal_spi
-- pn532_readAllMemoryBlocks
-- pn532readMifareMemory
-- pn532readMifareTargetID
-- pn532writeMifareMemory
 - serial_test
 - tone_test
