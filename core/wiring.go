@@ -102,7 +102,7 @@ func Hw_PinMode(pin, mode byte) {
 func PinMode(pin, mode byte) {
 	switch pin {
 	case 3, 9, 10, 11:
-		fd, err := syscall.Open("/dev/pwmtimer", os.O_RDONLY|syscall.O_CLOEXEC, 0666)
+		fd, err := syscall.Open(pwm_dev, os.O_RDONLY|syscall.O_CLOEXEC, 0666)
 		if err != nil {
 			panic("open pwm device fail")
 		}
