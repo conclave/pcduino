@@ -72,6 +72,10 @@ func main() {
 	if err = os.Chdir(package_name); err != nil {
 		return
 	}
+	if _, err = os.Stat(file_name); err == nil {
+		err = os.ErrExist
+		return
+	}
 	file, err := os.Create(file_name)
 	if err != nil {
 		return
