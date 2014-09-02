@@ -15,9 +15,20 @@ func main() {
 	}
 }
 
+var buffer []byte
+
 func setup() {
+	Serial.Begin(115200, SERIAL_8N1)
+	for Serial == nil {
+		Delay(10)
+	}
+	Serial.Println("Serial online")
+	buffer = make([]byte, 1)
 }
 
 func loop() {
-	Delay(100)
+	if n, _ := Serial.Read(buffer); n > 0 {
+		Serial.Printf("Received: %d", buffer[0])
+	}
+	Delay(200)
 }

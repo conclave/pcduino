@@ -30,6 +30,7 @@ These programs are modeled from c_environment's [sample](https://github.com/pcdu
 - pn532writeMifareMemory
 - MQ2
 - pwm_test
+- serial_test
 - spi_test
 - tone_test
 
@@ -37,4 +38,3 @@ These programs are modeled from c_environment's [sample](https://github.com/pcdu
 
 - liquidcrystal_i2c
 - liquidcrystal_spi
-- serial_test
