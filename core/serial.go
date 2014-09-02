@@ -1,9 +1,9 @@
-// +build linux,!cgo
+// +build linux
 
 package core
 
 import (
-	// "fmt"
+	"fmt"
 	"os"
 	"runtime"
 	"sync"
@@ -16,35 +16,41 @@ const SERIAL_BUFFER_SIZE = 1024
 
 type hwSerial struct {
 	file  *os.File
-	mutex sync.Mutex
+	mutex *sync.Mutex
 }
 
 var Serial *hwSerial = nil
 
-func (this *hwSerial) Begin(baud uint, config byte) error {
+func (*hwSerial) Begin(baud uint, config byte) (err error) {
 	if Serial == nil {
 		f, err := os.OpenFile(serial_name, syscall.O_RDWR|syscall.O_NOCTTY|syscall.O_NONBLOCK, 0666)
 		if err != nil {
 			return err
 		}
-		Serial = &hwSerial{f, sync.Mutex{}}
+		Serial = &hwSerial{f, &sync.Mutex{}}
 		runtime.SetFinalizer(f, func(fd *os.File) {
 			fd.Close()
 		})
 	}
+	defer Serial.mutex.Unlock()
+	Serial.mutex.Lock()
 	Hw_PinMode(GPIO0, IO_UART_FUNC)
 	Hw_PinMode(GPIO1, IO_UART_FUNC)
 
-	rate := uint32(get_valid_baud(baud))
-	fd := uintptr(this.file.Fd())
-	t := syscall.Termios{
-		Iflag:  syscall.IGNPAR,
-		Cflag:  syscall.CS8 | syscall.CREAD | syscall.CLOCAL | rate,
-		Cc:     [32]uint8{syscall.VMIN: 1},
-		Ispeed: rate,
-		Ospeed: rate,
+	fd := int(Serial.file.Fd())
+	t := syscall.Termios{}
+	if err = Ioctl(fd, syscall.TCGETS, uintptr(unsafe.Pointer(&t))); err != nil {
+		return err
 	}
-	t.Cflag &= ^syscall.CSIZE
+	if err = Ioctl(fd, syscall.TCIOFLUSH, 0); err != nil {
+		return err
+	}
+	rate := uint32(get_valid_baud(baud))
+	if rate > 0 {
+		t.Ispeed = rate
+		t.Ospeed = rate
+	}
+	t.Cflag = uint32(int32(t.Cflag) & ^syscall.CSIZE)
 	t.Cflag |= uint32(get_databit(config))
 
 	switch get_parity(config) {
@@ -53,45 +59,69 @@ func (this *hwSerial) Begin(baud uint, config byte) error {
 		t.Iflag |= syscall.INPCK
 	case 'E':
 		t.Cflag |= syscall.PARENB
-		t.Cflag &= ^syscall.PARODD
+		t.Cflag = uint32(int32(t.Cflag) & ^syscall.PARODD)
 		t.Iflag |= syscall.INPCK
 	default:
-		t.Cflag &= ^syscall.PARENB
-		t.Iflag &= ^syscall.INPCK
+		t.Cflag = uint32(int32(t.Cflag) & ^syscall.PARENB)
+		t.Iflag = uint32(int32(t.Iflag) & ^syscall.INPCK)
 	}
 
 	switch get_stopbit(config) {
 	case 2:
 		t.Cflag |= syscall.CSTOPB
 	default:
-		t.Cflag &= ^syscall.CSTOPB
+		t.Cflag = uint32(int32(t.Cflag) & ^syscall.CSTOPB)
 	}
 
-	t.Cflag &= ^(syscall.ICANON | syscall.ECHO | syscall.ECHOE | syscall.ISIG)
-	err := Ioctl(fd, uintptr(syscall.TCSETS), uintptr(unsafe.Pointer(&t)))
-	if err != nil {
+	t.Cflag = uint32(int32(t.Cflag) & ^(syscall.ICANON | syscall.ECHO | syscall.ECHOE | syscall.ISIG))
+	if err = Ioctl(fd, uintptr(syscall.TCSETS), uintptr(unsafe.Pointer(&t))); err != nil {
+		return err
+	}
+	if err = Ioctl(fd, syscall.TCIOFLUSH, 0); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (this *hwSerial) Read(buffer []byte) (int, error) {
-	return this.file.Read(buffer)
+func (*hwSerial) Read(buffer []byte) (int, error) {
+	defer Serial.mutex.Unlock()
+	Serial.mutex.Lock()
+	return Serial.file.Read(buffer)
 }
 
-func (this *hwSerial) Flush() error {
-	return this.file.Sync()
+func (*hwSerial) Flush() (err error) {
+	defer Serial.mutex.Unlock()
+	Serial.mutex.Lock()
+	// if err = Serial.file.Sync(); err != nil {
+	// 	return
+	// }
+	err = Ioctl(int(Serial.file.Fd()), syscall.TCIOFLUSH, 0)
+	return
 }
 
-func (this *hwSerial) Write(buffer []byte) (int, error) {
-	return this.file.Write(buffer)
+func (*hwSerial) Write(buffer []byte) (int, error) {
+	defer Serial.mutex.Unlock()
+	Serial.mutex.Lock()
+	return Serial.file.Write(buffer)
+}
+
+func (*hwSerial) Print(a ...interface{}) (int, error) {
+	return fmt.Fprint(Serial, a...)
+}
+
+func (*hwSerial) Printf(format string, a ...interface{}) (int, error) {
+	return fmt.Fprintf(Serial, format, a...)
+}
+
+func (*hwSerial) Println(a ...interface{}) (int, error) {
+	return fmt.Fprintln(Serial, a...)
 }
 
 const (
 	SERIAL_5N1 = 0x00
 	SERIAL_6N1 = 0x02
 	SERIAL_7N1 = 0x04
-	SERIAL_8N1 = 0x06
+	SERIAL_8N1 = 0x06 //default
 	SERIAL_5N2 = 0x08
 	SERIAL_6N2 = 0x0A
 	SERIAL_7N2 = 0x0C
