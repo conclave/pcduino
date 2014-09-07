@@ -35,7 +35,7 @@ func init() {
 
 func loop() {
 	DigitalWrite(trig, HIGH)
-	DelayMicrosends(20)
+	DelayMicroseconds(20)
 	DigitalWrite(trig, LOW)
 	duration := PulseIn(echo, HIGH, 1000000)
 	fmt.Printf("cm: %.2f\n", float64(duration)*SPEED_OF_SOUND)

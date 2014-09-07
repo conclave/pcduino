@@ -101,7 +101,7 @@ func (this *LCD) Begin(cols, lines byte, dotsize byte) {
 	}
 	// according to datasheet, we need at least 40ms after power rises above 2.7V
 	// before sending commands. Arduino can turn on way before 4.5V so we'll wait 50
-	DelayMicrosends(50000)
+	DelayMicroseconds(50000)
 	DigitalWrite(this.rs, LOW)
 	DigitalWrite(this.ep, LOW)
 	if this.rw != 0xFF {
@@ -109,17 +109,17 @@ func (this *LCD) Begin(cols, lines byte, dotsize byte) {
 	}
 	if this.fn&LCD_8BITMODE == 0 {
 		this.write4bits(0x03)
-		DelayMicrosends(4500)
+		DelayMicroseconds(4500)
 		this.write4bits(0x03)
-		DelayMicrosends(4500)
+		DelayMicroseconds(4500)
 		this.write4bits(0x03)
-		DelayMicrosends(150)
+		DelayMicroseconds(150)
 		this.write4bits(0x02)
 	} else {
 		this.command(LCD_FUNCTIONSET | this.fn)
-		DelayMicrosends(4500)
+		DelayMicroseconds(4500)
 		this.command(LCD_FUNCTIONSET | this.fn)
-		DelayMicrosends(150)
+		DelayMicroseconds(150)
 		this.command(LCD_FUNCTIONSET | this.fn)
 	}
 	this.command(LCD_FUNCTIONSET | this.fn)
@@ -132,12 +132,12 @@ func (this *LCD) Begin(cols, lines byte, dotsize byte) {
 
 func (this *LCD) Clear() {
 	this.command(LCD_CLEARDISPLAY)
-	DelayMicrosends(2000)
+	DelayMicroseconds(2000)
 }
 
 func (this *LCD) Home() {
 	this.command(LCD_RETURNHOME)
-	DelayMicrosends(2000)
+	DelayMicroseconds(2000)
 }
 
 func (this *LCD) SetCursor(col, row byte) {
@@ -241,11 +241,11 @@ func (this *LCD) send(value byte, mode byte) {
 
 func (this *LCD) pulseEnable() {
 	DigitalWrite(this.ep, LOW)
-	DelayMicrosends(1)
+	DelayMicroseconds(1)
 	DigitalWrite(this.ep, HIGH)
-	DelayMicrosends(1)
+	DelayMicroseconds(1)
 	DigitalWrite(this.ep, LOW)
-	DelayMicrosends(100)
+	DelayMicroseconds(100)
 }
 
 func (this *LCD) write4bits(value byte) {

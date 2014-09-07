@@ -274,11 +274,11 @@ func SPI_adc_read_data(channel byte) int {
 		panic("can't send spi message: " + err.Error())
 	}
 	DigitalWrite(SPIEX_CS, 1)
-	DelayMicrosends(10)
+	DelayMicroseconds(10)
 	DigitalWrite(SPIEX_CS, 0)
-	DelayMicrosends(180)
+	DelayMicroseconds(180)
 	DigitalWrite(SPIEX_CS, 1)
-	DelayMicrosends(10)
+	DelayMicroseconds(10)
 	DigitalWrite(SPIEX_CS, 0)
 	transfer.TX_buf = 0
 	transfer.RX_buf = uint64(uintptr(unsafe.Pointer(&rxbuf)))

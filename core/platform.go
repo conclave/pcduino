@@ -12,18 +12,18 @@ func Micros() int64 {
 	return time.Now().UnixNano() / int64(time.Microsecond)
 }
 
-func Delay(ms time.Duration) {
-	time.Sleep(ms * time.Millisecond)
+func Delay(ms int64) {
+	time.Sleep(time.Duration(ms) * time.Millisecond)
 }
 
-func DelayMicrosends(us time.Duration) {
-	time.Sleep(us * time.Microsecond)
+func DelayMicroseconds(us int64) {
+	time.Sleep(time.Duration(us) * time.Microsecond)
 }
 
-func DelayShed(ms time.Duration) {
-	time.Sleep(ms * time.Millisecond)
+func DelayShed(ms int64) {
+	time.Sleep(time.Duration(ms) * time.Millisecond)
 }
 
-func DelayMicrosendsSched(us time.Duration) {
-	time.Sleep(us * time.Microsecond)
+func DelayMicrosecondsSched(us int64) {
+	time.Sleep(time.Duration(us) * time.Microsecond)
 }

@@ -63,7 +63,7 @@ func (this *LCD) Init() {
 	PinMode(this.cs, OUTPUT)
 	DigitalWrite(this.cs, LOW)
 	DigitalWrite(this.rst, LOW)
-	DelayMicrosends(10)
+	DelayMicroseconds(10)
 	DigitalWrite(this.rst, HIGH)
 	// get into extended mode
 	this.Command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION)
@@ -78,7 +78,7 @@ func (this *LCD) Init() {
 	this.Command(PCD8544_FUNCTIONSET)
 	// set display to normal
 	this.Command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYNORMAL)
-	DelayMicrosends(10)
+	DelayMicroseconds(10)
 	this.logo()
 }
 

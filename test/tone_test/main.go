@@ -1,8 +1,6 @@
 package main
 
 import (
-	"time"
-
 	. "github.com/conclave/pcduino/core"
 )
 
@@ -34,7 +32,7 @@ func setup() {
 		noteDuration = 1000 / noteDurations[thisNote]
 		Tone(TONE_PIN, melody[thisNote])
 		//pauseBetweenNotes = noteDuration * 1.30;
-		Delay(time.Duration(noteDuration))
+		Delay(int64(noteDuration))
 		// stop the tone playing:
 		NoTone(TONE_PIN)
 	}

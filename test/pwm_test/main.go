@@ -32,5 +32,5 @@ func setup() {
 }
 
 func loop() {
-	DelayMicrosends(200000)
+	DelayMicroseconds(200000)
 }

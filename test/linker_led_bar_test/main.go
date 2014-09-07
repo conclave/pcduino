@@ -65,7 +65,7 @@ func send16bitData(data uint) {
 func latchData() {
 	latchFlag := 0
 	DigitalWrite(dataPin, LOW)
-	DelayMicrosends(200)
+	DelayMicroseconds(200)
 	for i := 0; i < 8; i++ {
 		if latchFlag == 1 {
 			DigitalWrite(dataPin, LOW)
@@ -75,7 +75,7 @@ func latchData() {
 			latchFlag = 1
 		}
 	}
-	DelayMicrosends(200)
+	DelayMicroseconds(200)
 }
 
 func sendLED(state uint) {

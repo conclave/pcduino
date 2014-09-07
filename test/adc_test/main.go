@@ -34,5 +34,5 @@ func setup() {
 func loop() {
 	value := AnalogRead(byte(adc_id))
 	fmt.Printf("ADC%d level is %d\n", adc_id, value)
-	DelayMicrosends(100000)
+	DelayMicroseconds(100000)
 }

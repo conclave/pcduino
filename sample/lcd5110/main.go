@@ -63,5 +63,5 @@ func loop() {
 	lcd.DrawString(0, 36, addr)
 	lcd.DrawLine(0, 45, 83, 45, pcd8544.BLACK)
 	lcd.Display()
-	Delay(time.Duration(step))
+	Delay(step)
 }
