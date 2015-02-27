@@ -22,21 +22,17 @@ func (vw *VirtualWire) SetRxInverted(inverted bool) {
 /// \param[in] inverted True to invert PTT
 func (vw *VirtualWire) SetPttInverted(inverted bool) {
 	vw.ptt_inverted = inverted
-}
-
-/// Initialise the VirtualWire software, to operate at speed bits per second
-/// Call this one in your setup() after any vw_set_* calls
-/// Must call vw_rx_start() before you will get any messages
-/// \param[in] speed Desired speed in bits per second
-func (vw *VirtualWire) Setup(speed uint16) {
-	PinMode(vw.tx_pin, OUTPUT)
-	PinMode(vw.rx_pin, INPUT)
-	PinMode(vw.ptt_pin, OUTPUT)
 	if vw.ptt_inverted {
 		DigitalWrite(vw.ptt_pin, 1)
 	} else {
 		DigitalWrite(vw.ptt_pin, 0)
 	}
+}
+
+/// Set vw to operate at speed bits per second
+/// Must call StartRx() before you will get any messages
+/// \param[in] speed Desired speed in bits per second
+func (vw *VirtualWire) SetSpeed(speed uint16) {
 }
 
 func (vw *VirtualWire) StartTx() {
@@ -179,9 +175,6 @@ func (vw *VirtualWire) HaveMessage() bool {
 
 /// If a message is available (good checksum or not), copies
 /// up to *len octets to buf.
-/// \param[in] buf Pointer to location to save the read data (must be at least *len bytes.
-/// \param[in,out] len Available space in buf. Will be set to the actual number of octets read
-/// \return true if there was a message and the checksum was good
 func (vw *VirtualWire) GetMessage() ([]byte, error) {
 	// Message available?
 	if !vw.rx_done {
@@ -233,6 +226,10 @@ func NewVirtualWire(pins ...byte) *VirtualWire {
 		rx = pins[1]
 		tx = pins[2]
 	}
+	PinMode(tx, OUTPUT)
+	PinMode(rx, INPUT)
+	PinMode(ptt, OUTPUT)
+	DigitalWrite(ptt, 0)
 	return &VirtualWire{
 		ptt_pin: ptt,
 		rx_pin:  rx,
